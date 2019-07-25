@@ -22,3 +22,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+
+/*
+allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
+	dependencies {
+	        implementation 'com.github.tarekmabdallah91:CVapp:Tag'
+	}
+
+*/

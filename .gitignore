@@ -70,4 +70,4 @@ fastlane/readme.md
 
 # for API keys security
 /gradle.properties
-*.properties
+#*.properties

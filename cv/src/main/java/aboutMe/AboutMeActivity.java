@@ -18,6 +18,7 @@
 
 package aboutMe;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,10 +27,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.gmail.tarekmabdallah91.aboutme.R;
 
+import static android.view.View.GONE;
+
 public class AboutMeActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private String cvName, cvJobTitle, cvMobileNumber, cvEmail, cvLinkedIn, cvGithub;
+    private static final String CV_DATA = "CV_DATA", EMPTY_STRING = "" ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,36 +46,73 @@ public class AboutMeActivity extends AppCompatActivity implements View.OnClickLi
         ImageView emailIcon = findViewById(R.id.email);
         ImageView linkedinIcon = findViewById(R.id.linkedin);
         ImageView githubIcon = findViewById(R.id.github);
+        TextView nameTV = findViewById(R.id.cv_name_tv);
+        TextView jobTitleTV = findViewById(R.id.cv_job_tv);
         setOnClickListenerForViews(callIcon, emailIcon, linkedinIcon, githubIcon);
+        getComingIntent();
+        if (isValidInput(cvName)) nameTV.setText(cvName);
+        else letViewGone(nameTV);
+
+        if (isValidInput(cvJobTitle)) jobTitleTV.setText(cvJobTitle);
+        else letViewGone(jobTitleTV);
+
+        if (!isValidInput(cvMobileNumber)) letViewGone(callIcon);
+        if (!isValidInput(cvEmail)) letViewGone(emailIcon);
+        if (!isValidInput(cvLinkedIn)) letViewGone(linkedinIcon);
+        if (!isValidInput(cvGithub)) letViewGone(githubIcon);
+
+    }
+
+    private void getComingIntent (){
+        Intent comingIntent = getIntent();
+        String[] cvData = comingIntent.getStringArrayExtra(CV_DATA);
+        cvName = cvData[0];
+        cvJobTitle = cvData[1];
+        cvMobileNumber = cvData[2];
+        cvEmail = cvData[3];
+        cvLinkedIn = cvData[4];
+        cvGithub = cvData[5];
+    }
+
+    /**
+     * @param input-
+     * @return true if valid or false if not valid
+     */
+    private boolean isValidInput (String input){
+        return !(input == null || input.equals(EMPTY_STRING));
+    }
+
+    private void letViewGone (View view){
+        view.setVisibility(GONE);
     }
 
     void onClickCallIcon() {
         Intent callNumber = new Intent(Intent.ACTION_DIAL);
-        String uriData = String.format("tel:%s", getString(R.string.mobile_number));
+        final String TEL = "tel:%s";
+        String uriData = String.format(TEL, cvMobileNumber);
         callNumber.setData(Uri.parse(uriData));
         startActivity(callNumber);
     }
 
+    @SuppressLint("IntentReset")
     void onClickEmailIcon() {
         final String EMAIL_INTENT = "mailto:";
         final String TEXT_TYPE = "text/plain";
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
         emailIntent.setData(Uri.parse(EMAIL_INTENT));
         emailIntent.setType(TEXT_TYPE);
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{getString(R.string.email)});
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{cvEmail});
         startActivity(emailIntent);
     }
 
     private void onClickLinkedinIcon() {
-        final String youtubePage = "http://bit.ly/2kfdLeB"; // my linkedin page
-        final String youtubePackage = "vnd.linkedin:";
-        startExternalIntent(youtubePackage, youtubePage);
+        final String linkedinPackage = "vnd.linkedin:";
+        startExternalIntent(linkedinPackage, cvLinkedIn);
     }
 
     private void onClickGithubIcon() {
-        final String youtubePage = "http://bit.ly/2Pi2h84"; // my github page
-        final String youtubePackage = "vnd.github:";
-        startExternalIntent(youtubePackage, youtubePage);
+        final String githubPackage = "vnd.github:";
+        startExternalIntent(githubPackage, cvGithub);
     }
 
     private Intent setExternalIntent(String externalAppPackage, String pageUrl) {
@@ -109,8 +153,15 @@ public class AboutMeActivity extends AppCompatActivity implements View.OnClickLi
         for (View view : views) view.setOnClickListener(this);
     }
 
-    public static void openAboutMeActivity(Context context) {
+    /**
+     * open CV screen
+     * @param context -
+     * @param cvData put your values in this order cvName, cvJobTitle, cvMobileNumber, cvEmail, cvLinkedIn, cvGithub
+     *               you should put empty string ("") if there was not a value for any of them
+     */
+    public static void openAboutMeActivity(Context context, String...cvData) {
         Intent openAboutMeActivity = new Intent(context, AboutMeActivity.class);
+        openAboutMeActivity.putExtra(CV_DATA, cvData);
         context.startActivity(openAboutMeActivity);
     }
 }
